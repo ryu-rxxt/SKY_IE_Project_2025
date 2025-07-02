@@ -1,0 +1,7 @@
+[project]
+name = "sky-ie-project"
+version = "0.1.0"
+description = "Optimization project file of team 2"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = []
