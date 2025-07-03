@@ -63,7 +63,7 @@ python src/sky_ie_project/main.py
 
 # FAQ
 Q. uv가 안된다고 나와요.
--`uv --version`을 입력해보세요. 안 나오면 설치가 안 된 거예요. 설치 스크립트를 다시 실행하세요.
+- `uv --version`을 입력해보세요. 안 나오면 설치가 안 된 거예요. 설치 스크립트를 다시 실행하세요.
 
 Q. 가상환경이 안 켜져요.
 - macOS는 터미널에 `source .venv/bin/activate` 입력
