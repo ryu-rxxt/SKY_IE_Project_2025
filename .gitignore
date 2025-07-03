@@ -12,3 +12,5 @@ __pycache__/
 # 기타
 .env
 data/
+*.db
+*.csv
