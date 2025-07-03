@@ -23,12 +23,12 @@ uv sync --python .venv/bin/python
 # Git 설치 (이미 있다면 건너뛰기)
 https://git-scm.com 에서 다운로드 및 설치
 
-# PowerShell 관리자 권한으로 실행 후 아래 명령어 한 줄씩 입력(복붙 가능)
+# Git Bash 실행 후 아래 명령어 한 줄씩 입력(복붙 가능)
 irm https://astral.sh/uv/install.ps1 | iex
 git clone https://github.com/ryu-rxxt/SKY_IE_Project_2025.git
 cd SKY_IE_Project_2025
 uv venv --python 3.11.9
-. .venv/Scripts/Activate.ps1
+source .venv/bin/activate
 uv sync --python .venv/Scripts/python.exe
 
 ---------------------------------------------------------
