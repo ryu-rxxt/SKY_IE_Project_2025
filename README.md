@@ -10,7 +10,7 @@
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install uv
 brew install git
-git clone https://github.com/your-username/SKY_IE_Project_2025.git
+git clone https://github.com/ryu-rxxt/SKY_IE_Project_2025.git
 cd SKY_IE_Project_2025
 uv venv --python 3.11.9
 source .venv/bin/activate
@@ -25,7 +25,7 @@ https://git-scm.com 에서 다운로드 및 설치
 
 # PowerShell 관리자 권한으로 실행 후 아래 명령어 한 줄씩 입력(복붙 가능)
 irm https://astral.sh/uv/install.ps1 | iex
-git clone https://github.com/your-username/SKY_IE_Project_2025.git
+git clone https://github.com/ryu-rxxt/SKY_IE_Project_2025.git
 cd SKY_IE_Project_2025
 uv venv --python 3.11.9
 . .venv/Scripts/Activate.ps1
