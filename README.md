@@ -97,7 +97,7 @@ uv sync
 uv add numpy tensorflow
 git add pyproject.toml uv.lock
 git commit -m "package add"
-git push origin main
+git push origin (각자 이름 이니셜 ex: kh)
 ```
 ---------------------------------------------------------
 ## 작업 마무리 후
@@ -107,7 +107,7 @@ git add .
 git commit -m "Add: ~~ 기능 추가"
 # 오류 수정한 경우
 git commit -m "Fix: ~~ 오류 수정"
-git push origin main
+git push origin (각자 이름 이니셜 ex: kh)
 ```
 ---------------------------------------------------------
 # References
