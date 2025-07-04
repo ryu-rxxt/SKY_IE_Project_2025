@@ -87,8 +87,9 @@ def city_demand_plot(which_city):
 
 
 def main():
-    total_demand_plot()
+    #total_demand_plot()
     city_demand_plot("Montreal")
+    
 
 
 if __name__ == "__main__":
