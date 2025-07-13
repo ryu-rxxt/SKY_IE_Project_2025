@@ -71,6 +71,17 @@ wheels = [
 ]
 
 [[package]]
+name = "gurobipy"
+version = "12.0.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/9c/2bb1f981aa42dd983eb26276d45a4e835a3a319bad24080e8f7748ce814b/gurobipy-12.0.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:cb227b0a92b55d7eed93fd0a3de6213ed6d0e10eb81316bb3f495e0585f90ab5", size = 12305659, upload-time = "2025-05-06T02:20:26.355Z" },
+    { url = "https://files.pythonhosted.org/packages/47/23/3dbeb7ba40d37837449927def83c552032287bf9fb9f8e77c9d1875dc976/gurobipy-12.0.2-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:f7d1aff950289a20a596f8dbb3d4af65afc09d184e5c82a45835d83db5a71233", size = 62761250, upload-time = "2025-05-06T02:20:30.666Z" },
+    { url = "https://files.pythonhosted.org/packages/45/58/a4d1fe171296249ab5461caac0301eb06b5d50a726b0edab0277572b8e58/gurobipy-12.0.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4feb9f92954df44e52f14a404c966e2a7a183e7b6b63b05473fa4acfe7c356d8", size = 14475125, upload-time = "2025-05-06T02:20:35.516Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/eb/86a5e22c20447e7621d74b3b1e7c96885c5278805ea1b64b30a5b904cad6/gurobipy-12.0.2-cp311-cp311-win_amd64.whl", hash = "sha256:432663e84ce2d37a085e1a5b6558618ba098805b0f963817758d1d95579d1dec", size = 11223516, upload-time = "2025-05-06T02:20:37.88Z" },
+]
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.8"
 source = { registry = "https://pypi.org/simple" }
@@ -275,6 +286,7 @@ name = "sky-ie-project"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "gurobipy" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "openpyxl" },
@@ -286,6 +298,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "gurobipy", specifier = ">=12.0.2" },
     { name = "matplotlib", specifier = ">=3.10.3" },
     { name = "numpy", specifier = ">=2.3.1" },
     { name = "openpyxl", specifier = ">=3.1.5" },
