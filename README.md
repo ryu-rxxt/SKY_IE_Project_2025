@@ -1,115 +1,56 @@
-# 협업 개발 환경 Setting Guideline
+# 사용한 환경 사양
+Gurobi / 10 Core / 16GB / local
 
-- **프로젝트 기간동안 VSCode를 사용할 예정이니 PC에 없다면 설치해주시길 바랍니다.**
-- 설치 링크: https://code.visualstudio.com/
 
----------------------------------------------------------
+# Phase 1: prediction
+- 코드: sku_forecast_main_v3.py
+1. 데이터 로딩
+SQLite DB에서 수요 데이터(demand_train.db) 불러오기
+외부 CSV 데이터(환율, 유가, 공휴일, 날씨 등) 로딩
 
-## macOS
+2. 전처리 & 외부 데이터 병합
+결측치 보정 (유가/환율/소비자신뢰지수 등)
+카테고리 원핫 인코딩
+국가별/도시별 매핑
 
-- **터미널 실행 후 아래 명령어 한 줄씩 입력**(복붙 가능)
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install uv
-brew install git
-git clone https://github.com/ryu-rxxt/SKY_IE_Project_2025.git
-cd SKY_IE_Project_2025
-uv venv --python 3.11.9
-source .venv/bin/activate
-uv sync --python .venv/bin/python
-```
+3.이벤트 탐지
+STL 분해를 통한 수요 트렌드/계절성/잔차 분리
+이벤트(급격한 수요 증가) 구간 탐지 및 플래깅
 
-## Windows OS
+4. 예측 모델
+Ridge 회귀 + GridSearchCV로 α 튜닝
+Lag(365일) + 외생변수 기반 학습
+이벤트 구간에서는 uplift 보정 적용
+2023~2024년 예측치를 forecast_submission_template.csv로 저장
 
-- https://git-scm.com 에서 Git 다운로드 및 설치(이미 있으신 분은 생략하셔도 됩니다)
+# Phase 2: planning
+## 개괄
+- project.py에 모든 기능을 구현하기에는 코드 규모가 크므로 기능별로 모듈을 분리하여 각기 다른 코드 파일로 작성
 
-- **Git Bash 실행 후 아래 명령어 한 줄씩 입력**(복붙 가능)
-```bash
-irm https://astral.sh/uv/install.ps1 | iex
-git clone https://github.com/ryu-rxxt/SKY_IE_Project_2025.git
-cd SKY_IE_Project_2025
-uv venv --python 3.11.9
-source .venv/bin/activate
-uv sync --python .venv/Scripts/python.exe
-```
----------------------------------------------------------
+## 코드 설명
+### io_utils.py
+- 제공된 data를 코드 내에서 사용할 수 있도록 용도에 알맞게 형태를 다듬거나 필요한 정보를 뽑아내는 함수로 구성
+- tp_mode 결정 우선순위는 cost이나, 이와 동시에 수요의 급격한 변화에도 탄력적으로 대응할 수 있도록 하기 위해 leadtime이 9일을 초과하지 않도록 함
 
-## 폴더 구조 및 파일 설명
+### optimize.py
+- 창고와 공장의 위치 최적화 문제를 풀기 위한 모델로 구성
+- 전체 기간(2018-01-01 - 2022-12-31)에 대해 공장/창고 위치 최적화와 동시에 각 SKU에 대한 생산/물류 계획을 최적화하는 것이 optimal하나 infeasible함
+- 따라서 현실적인 제약 하에 본래 목적식을 가장 적게 왜곡하면서 잘 반영하는 방법은 전체 기간에 대해 한 주(혹은 하루)로 시점을 고정하고, 평균값을 사용하는 것이라 판단
+- 이에 따라 초기 비용은 Present value를 Annual value로 보정하여, 발생가능한 왜곡을 보정하고자 함
+- 또한 창고가 지어지지 않은 모든 지역은 재고를 보유할 수 없다는 조건이 있어 창고와 공장 위치 최적화를 따로 진행해도 괜찮다고 판단하였고, 창고 위치 최적화 이후 공장 위치 최적화하도록 방향으로 모델 작성
+- 창고 -> 도시로는 매일 배송하고, 공장 -> 창고로는 일주일 중 하루동안 필요 수량을 전량 생산한 뒤 배송한다고 가정(즉, 주 1회 생산/배송)
+- 일 1회 생산/배송부터 주 1회 생산/배송까지 비용을 비교해봤을 때 주 1회가 가장 적합하다고 판단
+- 최적해로 결정된 공장/창고는 2018-01-01에 바로 짓는다고 가정
+- 모델 복잡성을 낮추기 위해 capacity나 labour_policy를 제약 조건으로 고려하지 않은 점이 이 최적화 모델의 한계라고 볼 수 있음
 
-```text
-SKY_IE_Project_2025/
-├── data/                     ← 제공받은 데이터 파일
-├── pyproject.toml            ← 의존성 관리
-├── requirements.txt          ← 의존성 관리
-├── .gitignore                ← 추적 제외 파일 목록
-├── README.md                 ← 지금 읽고 있는 파일
-├── .vscode/settings.json     ← VS Code 설정
-├── src/
-│   └── sky_ie_project/
-│       └── main.py           ← 실행할 메인 코드
-```
+### domain.py
+- 최적해를 바탕으로 생산/물류 계획을 세울 때 관리가 용이하도록 공장/창고/도시에 대한 객체를 정의하고 용도에 적합하도록 내부 변수를 정의함
 
----------------------------------------------------------
+### flag.py
+- 특정 제약조건이 만족됐을 때 특정 연산을 수행하는 플래그 함수들을 정의
 
-## 프로젝트 실행 방법
+### simulation.py
+- 최적해와 앞서 정의한 객체 정보를 바탕으로 생산/물류 계획 작성을 위한 초기 설정과 2018-01-01부터 2024-12-31까지 생산/물류 계획을 작성하는 코드로 구성
 
-- VS Code 실행
-- `ctrl` + `(숫자 1 좌측에 위치) 누르고 화면 하단에 터미널 창 생기는지 확인
-- 터미널에 아래 **명령어를 한 줄씩 입력**하면 `main.py`가 실행됨
-```
-cd ~/SKY_IE_Project_2025
-code .
-```
-- `code .` 명령어가 안되면 `Command Palette`(단축키: `Ctrl` + `Shift` + `P` 또는 `F1` -> `Shell Command: Install ‘code’ command in PATH` 클릭 후 재시도
-
----------------------------------------------------------
-
-## FAQ
-
-Q. uv가 안된다고 나와요.
-- `uv --version`을 입력해서 숫자가 안 나오는 경우 설치 스크립트를 다시 실행하시면 됩니다.
-
-Q. 가상환경이 안 켜져요.
-- macOS는 터미널에 `source .venv/bin/activate` 입력
-- Windows OS는 `Git Bash`에 `. .venv/Scripts/Activate.ps1` 입력 (`.`도 꼭 포함해주세요)
-
-Q. Python은 설치 안 해도 돼요?
-- 네. `uv`가 자동으로 3.11.9 버전을 다운로드하여 가상환경에 설치해줍니다.
-
----------------------------------------------------------
-
-# 작업 전후 Guideline
-- 작업 시작 전과 마무리 후에는 **Project 파일이 반드시 GitHub와 동기화** 되어있어야 합니다.
-- 간단하여 **오래걸리지 않으니 잊지 않고 반드시** 아래 적어둔 명령어를 입력해주시길 바랍니다.
-- 위와 마찬가지로 Windows의 경우 `Git Bash`, Mac의 경우 `터미널`에 입력해주시면 됩니다.
-
----------------------------------------------------------
-
-## 작업 시작 전
-```
-git pull origin main
-uv sync
-```
----------------------------------------------------------
-## 새로운 패키지(모듈)를 코드에 추가한 경우
-- 예를 들어 코드에 `import numpy`, `import tensorflow`가 없었는데 내가 추가한 경우
-```
-uv add numpy tensorflow
-git add pyproject.toml uv.lock
-git commit -m "package add"
-git push origin (각자 이름 이니셜 ex: kh)
-```
----------------------------------------------------------
-## 작업 마무리 후
-```
-git add .
-# 기능 추가한 경우
-git commit -m "Add: ~~ 기능 추가"
-# 오류 수정한 경우
-git commit -m "Fix: ~~ 오류 수정"
-git push origin (각자 이름 이니셜 ex: kh)
-```
----------------------------------------------------------
-# References
-- uv 공식 문서: https://astral.sh/blog/uv/
-- Python 공식 사이트: https://www.python.org/
+### project.py
+- 해당 코드에서 실행을 누르면 Phase 2에 해당하는 코드가 실행됨
