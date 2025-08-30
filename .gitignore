@@ -16,3 +16,4 @@ data/
 *.csv
 .venv/
 zip3.zip
+*.zip
