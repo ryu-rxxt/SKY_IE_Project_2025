@@ -15,3 +15,4 @@ data/
 *.db
 *.csv
 .venv/
+zip3.zip
