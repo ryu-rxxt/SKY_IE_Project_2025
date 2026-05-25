@@ -1,6 +1,12 @@
 # 사용한 환경 사양
 Gurobi / 10 Core / 16GB / local
 
+# Contributions and Roles
+## Phase 1
+- 강태희, 김강민
+
+## Phase 2
+- 류근호
 
 # Phase 1: prediction
 - 코드: sku_forecast_main_v3.py
